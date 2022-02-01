@@ -1,4 +1,4 @@
-#define F_Size 8
+#define B_Size 8
 class ACTION
 {
 public:
@@ -26,14 +26,14 @@ private:
 
 	struct
 	{
-		int Typ[F_Size][F_Size];
+		int Typ[B_Size][B_Size];
 	}MS;
 
 	struct
 	{
-		int Typ[F_Size][F_Size];
-		int X[F_Size][F_Size];
-		int Y[F_Size][F_Size];
+		int Typ[B_Size][B_Size];
+		int X[B_Size][B_Size];
+		int Y[B_Size][B_Size];
 	}Fie;
 
 	struct
@@ -71,9 +71,9 @@ ACTION Act;
 
 ACTION::ACTION()
 {
-	for (int y = 0; y < F_Size; y = y + 1)
+	for (int y = 0; y < B_Size; y = y + 1)
 	{
-		for (int x = 0; x < F_Size; x = x + 1)
+		for (int x = 0; x < B_Size; x = x + 1)
 		{
 			MS.Typ[x][y] = 0;
 			Fie.Typ[x][y] = 0;
@@ -105,9 +105,9 @@ void ACTION::Cal()
 	else if (Fla.Yu == 1) Cur.Y = Cur.Y + 100;
 
 	if (Cur.X < 0) Cur.X = 0;
-	if (Cur.X > (F_Size - 1) * 100) Cur.X = (F_Size - 1) * 100;
+	if (Cur.X > (B_Size - 1) * 100) Cur.X = (B_Size - 1) * 100;
 	if (Cur.Y < 0) Cur.Y = 0;
-	if (Cur.Y > (F_Size - 1) * 100) Cur.Y = (F_Size - 1) * 100;
+	if (Cur.Y > (B_Size - 1) * 100) Cur.Y = (B_Size - 1) * 100;
 
 	//Cursol Enter
 	if (Key.Inf[KEY_INPUT_NUMPADENTER] == 1) Fla.Ent = 1;
@@ -133,7 +133,7 @@ void ACTION::Cal()
 					{
 						i = Cur.X / 100 + x;
 						j = Cur.Y / 100 + y;
-						if (i >= 0 && i < F_Size && j >= 0 && j < 8)
+						if (i >= 0 && i < B_Size && j >= 0 && j < 8)
 						{
 							Fie.Typ[i][j] = Sle;
 						}
@@ -149,9 +149,9 @@ void ACTION::Cal()
 			MS.Typ[x][y] = Sle;
 			MS1.X = Cur.X;
 			MS1.Y = Cur.Y;
-			for (int y = 0; y < F_Size; y = y + 1)
+			for (int y = 0; y < B_Size; y = y + 1)
 			{
-				for (int x = 0; x < F_Size; x = x + 1)
+				for (int x = 0; x < B_Size; x = x + 1)
 				{
 					Fie.Typ[x][y] = 0;
 					Fie.X[x][y] = 0;
@@ -163,9 +163,9 @@ void ACTION::Cal()
 
 		if (Fla.Del == 1)
 		{
-			for (int y = 0; y < F_Size; y = y + 1)
+			for (int y = 0; y < B_Size; y = y + 1)
 			{
-				for (int x = 0; x < F_Size; x = x + 1)
+				for (int x = 0; x < B_Size; x = x + 1)
 				{
 					Fie.Typ[x][y] = 0;
 					Fie.X[x][y] = 0;
@@ -183,18 +183,18 @@ void ACTION::Cal()
 
 void ACTION::Cha()
 {
-	for (int y = 0; y < F_Size; y = y + 1)
+	for (int y = 0; y < B_Size; y = y + 1)
 	{
-		for (int x = 0; x < F_Size; x = x + 1)
+		for (int x = 0; x < B_Size; x = x + 1)
 		{
 			DrawGraph(x * 100, y * 100, Pic.Bac, TRUE);
 			if (Fie.Typ[x][y] == Sle && Sle > 0) DrawGraph(x * 100, y * 100, Pic.Sel, TRUE);
 		}
 	}
 
-	for (int y = 0; y < F_Size; y = y + 1)
+	for (int y = 0; y < B_Size; y = y + 1)
 	{
-		for (int x = 0; x < F_Size; x = x + 1)
+		for (int x = 0; x < B_Size; x = x + 1)
 		{
 			switch (MS.Typ[x][y])
 			{
