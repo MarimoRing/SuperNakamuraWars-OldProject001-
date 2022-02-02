@@ -1,4 +1,5 @@
 #define B_Size 8
+#include "BattleMovie.h"
 class ACTION
 {
 public:
@@ -216,6 +217,7 @@ void ACTION::Cha()
 		, "(Cur.X,Cur.Y) = (%d,%d)", Cur.X, Cur.Y);
 	DrawFormatStringToHandle(900, 50, Col.Bla, Fon.c[30]
 		, "(X,Y) = (%d,%d)", (Cur.X + 100) / 100, (Cur.Y + 100) / 100);
+	BattleMovie();
 
 	//Turn
 	// Even number
