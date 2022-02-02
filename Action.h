@@ -1,4 +1,5 @@
 #define Number_of_cells 8
+#define Number_of_units 5
 #include "BattleMovie.h"
 class ACTION
 {
@@ -10,37 +11,40 @@ public:
 		Change();
 	}
 private:
-	struct GUNDAM
+	struct GUNDAM //Define character status.
 	{
 		const char* Name;
-		int Picture;
+		int Picture;//Character Image
 		int HP;
 		int Attack;
 		int Defence;
-		int Move;
-		int X;
-		int Y;
+		int Move;	//Movement power
 	};
 
-	GUNDAM MS1 = { "ガンダム", Picture.Ally, 10, 10, 10, 2, 0, 0};
-	GUNDAM MS2 = { "ザク", Picture.Enemy, 10, 10, 10, 1, 0, 0 };
+	GUNDAM MS1 = { "ガンダム", Picture.Ally, 10, 10, 10, 2};
+	GUNDAM MS2 = { "ザク", Picture.Enemy, 10, 10, 10, 1};
 
 	struct
 	{
-		int Type[Number_of_cells][Number_of_cells];
+		int Type[Number_of_cells][Number_of_cells];		//Identification of MS
+		int Previous[Number_of_cells][Number_of_cells];	//Stores MS identification information
+		int X = 0;							//X coordinate of the selected MS
+		int Y = 0;							//Y coordinate of the selected MS
+		int Move[Number_of_units + 1];		//Store MS movement power
+		int X_state[Number_of_units + 1];	//Stores the X coordinate information of the MS
+		int Y_state[Number_of_units + 1];	//Stores the Y coordinate information of the MS
 	}MS;
 
 	struct
 	{
-		int Type[Number_of_cells][Number_of_cells];
-		int X[Number_of_cells][Number_of_cells];
-		int Y[Number_of_cells][Number_of_cells];
+		int Type[Number_of_cells][Number_of_cells];		//Field Identification
+		int Previous[Number_of_cells][Number_of_cells];	//Stores the field identification information
 	}Field;
 
 	struct
 	{
-		int X = 0;
-		int Y = 0;
+		int X = 0;	//X coordinate of the cursor
+		int Y = 0;	//Y coordinate of the cursor
 	}Cur;
 
 	struct
@@ -63,25 +67,27 @@ private:
 
 ACTION Action;
 
-ACTION::ACTION()
+ACTION::ACTION()	//Initialization
 {
 	for (int y = 0; y < Number_of_cells; y = y + 1)
 	{
 		for (int x = 0; x < Number_of_cells; x = x + 1)
 		{
 			MS.Type[x][y] = 0;
+			MS.Previous[x][y] = 0;
 			Field.Type[x][y] = 0;
-			Field.X[x][y] = 0;
-			Field.Y[x][y] = 0;
+			Field.Previous[x][y] = 0;
 		}
 	}
 	MS.Type[3][7] = 1;
-	MS1.X = 3 * 100;
-	MS1.Y = 7 * 100;
+	MS.Move[1] = MS1.Move;
+	MS.X_state[1] = 3 * 100;
+	MS.Y_state[1] = 7 * 100;
 
 	MS.Type[3][0] = 2;
-	MS2.X = 3 * 100;
-	MS2.Y = 0 * 100;
+	MS.Move[2] = MS2.Move;
+	MS.X_state[2] = 3 * 100;
+	MS.Y_state[2] = 0 * 100;
 }
 
 void ACTION::Calculation()
@@ -115,21 +121,26 @@ void ACTION::Calculation()
 	switch (Phase)
 	{
 	case 0:
+		//If a character is selected, show the range in which it can move.
 		if (Flag.Enter == 1 && MS.Type[x][y] != 0)
 		{
 			int i, j;
 			Select = MS.Type[x][y];
-			for (int y = -(MS1.Move); y <= MS1.Move; y = y + 1)
+			MS.Previous[x][y] = MS.Type[x][y];
+			MS.X = x;
+			MS.Y = y;
+			for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
 			{
-				for (int x = -(MS1.Move); x <= MS1.Move; x = x + 1)
+				for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
 				{
-					if (fabs(x) + fabs(y) <= MS1.Move && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
+					if (fabs(x) + fabs(y) <= MS.Move[Select] && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
 					{
 						i = Cur.X / 100 + x;
 						j = Cur.Y / 100 + y;
-						if (i >= 0 && i < Number_of_cells && j >= 0 && j < 8)
+						if (i >= 0 && i < Number_of_cells && j >= 0 && j < Number_of_cells)
 						{
-							Field.Type[i][j] = Select;
+							Field.Type[i][j] = 1;
+							Field.Previous[i][j] = 1;
 						}
 					}
 				}
@@ -138,23 +149,24 @@ void ACTION::Calculation()
 		}
 		break;
 	case 1:
+		//If you have selected a movable range, move the character.
 		if (Flag.Enter == 1 && Field.Type[x][y] != 0)
 		{
+			MS.Type[MS.X][MS.Y] = 0;
 			MS.Type[x][y] = Select;
-			MS1.X = Cur.X;
-			MS1.Y = Cur.Y;
+			MS.X_state[Select] = Cur.X;
+			MS.Y_state[Select] = Cur.Y;
 			for (int y = 0; y < Number_of_cells; y = y + 1)
 			{
 				for (int x = 0; x < Number_of_cells; x = x + 1)
 				{
 					Field.Type[x][y] = 0;
-					Field.X[x][y] = 0;
-					Field.Y[x][y] = 0;
 				}
 			}
 			Phase = 2;
 		}
 
+		//If you press Delete, return the board to the previous state.
 		if (Flag.Delete == 1)
 		{
 			for (int y = 0; y < Number_of_cells; y = y + 1)
@@ -162,49 +174,70 @@ void ACTION::Calculation()
 				for (int x = 0; x < Number_of_cells; x = x + 1)
 				{
 					Field.Type[x][y] = 0;
-					Field.X[x][y] = 0;
-					Field.Y[x][y] = 0;
+					Field.Previous[x][y] = 0;
 				}
 			}
+			Select = 0;
 			Phase = 0;
 		}
 		break;
 	case 2:
-		Select = 0;
+		//Select = 0;
+		//If you press Delete, return the board to the previous state.
+		if (Flag.Delete == 1)
+		{
+			MS.X_state[Select] = MS.X * 100;
+			MS.Y_state[Select] = MS.Y * 100;
+			for (int y = 0; y < Number_of_cells; y = y + 1)
+			{
+				for (int x = 0; x < Number_of_cells; x = x + 1)
+				{
+					if (MS.Type[x][y] == Select) 
+					{
+						MS.Type[x][y] = 0;
+					}
+					Field.Type[x][y] = Field.Previous[x][y];
+				}
+			}
+			MS.Type[MS.X][MS.Y] = MS.Previous[MS.X][MS.Y];
+			Phase = 1;
+		}
 		break;
 	}
 }
 
 void ACTION::Change()
 {
+	//Change the display of the board
 	for (int y = 0; y < Number_of_cells; y = y + 1)
 	{
 		for (int x = 0; x < Number_of_cells; x = x + 1)
 		{
 			DrawGraph(x * 100, y * 100, Picture.Back, TRUE);
-			if (Field.Type[x][y] == Select && Select > 0) DrawGraph(x * 100, y * 100, Picture.Select, TRUE);
+			if (Field.Type[x][y] == 1) DrawGraph(x * 100, y * 100, Picture.Select, TRUE);
 		}
 	}
 
+	//Display of characters
 	for (int y = 0; y < Number_of_cells; y = y + 1)
 	{
 		for (int x = 0; x < Number_of_cells; x = x + 1)
 		{
 			switch (MS.Type[x][y])
 			{
-			case 0:
+			case 0://Nothing
 				break;
 			case 1:
-				DrawGraph(MS1.X, MS1.Y, Picture.Ally, TRUE);
+				DrawGraph(MS.X_state[MS.Type[x][y]], MS.Y_state[MS.Type[x][y]], Picture.Ally, TRUE);
 				break;
 			case 2:
-				DrawGraph(MS2.X, MS2.Y, Picture.Enemy, TRUE);
+				DrawGraph(MS.X_state[MS.Type[x][y]], MS.Y_state[MS.Type[x][y]], Picture.Enemy, TRUE);
 				break;
 			}
 		}
 	}
 
-	//Cursol
+	//off-screen display
 	DrawGraph(Cur.X, Cur.Y, Picture.Cursor, TRUE);
 	DrawFormatStringToHandle(900, 0, Color.White, Font.c[30]
 		, "(Cur.X,Cur.Y) = (%d,%d)", Cur.X, Cur.Y);
@@ -212,6 +245,7 @@ void ACTION::Change()
 		, "(X,Y) = (%d,%d)", (Cur.X + 100) / 100, (Cur.Y + 100) / 100);
 	BattleMovie();
 
+	//Resetting the flags
 	Flag.X_right = 0;
 	Flag.X_left = 0;
 	Flag.Y_down = 0;
