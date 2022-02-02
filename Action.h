@@ -182,7 +182,7 @@ void ACTION::Change()
 		for (int x = 0; x < Number_of_cells; x = x + 1)
 		{
 			DrawGraph(x * 100, y * 100, Picture.Back, TRUE);
-			if (Field.Type[x][y] == Select && Select > 0) DrawGraph(x * 100, y * 100, Pic.Sel, TRUE);
+			if (Field.Type[x][y] == Select && Select > 0) DrawGraph(x * 100, y * 100, Picture.Select, TRUE);
 		}
 	}
 
@@ -206,9 +206,9 @@ void ACTION::Change()
 
 	//Cursol
 	DrawGraph(Cur.X, Cur.Y, Picture.Cursor, TRUE);
-	DrawFormatStringToHandle(900, 0, Color.Black, Font.c[30]
+	DrawFormatStringToHandle(900, 0, Color.White, Font.c[30]
 		, "(Cur.X,Cur.Y) = (%d,%d)", Cur.X, Cur.Y);
-	DrawFormatStringToHandle(900, 50, Color.Black, Font.c[30]
+	DrawFormatStringToHandle(900, 50, Color.White, Font.c[30]
 		, "(X,Y) = (%d,%d)", (Cur.X + 100) / 100, (Cur.Y + 100) / 100);
 	BattleMovie();
 
