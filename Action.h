@@ -1,6 +1,6 @@
 #define Number_of_cells 8
 #define Number_of_units 5
-#include "BattleMovie.h"
+#include "MAP_UI.h"
 class ACTION
 {
 public:
