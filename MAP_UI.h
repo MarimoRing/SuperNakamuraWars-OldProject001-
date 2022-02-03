@@ -2,9 +2,10 @@
 #define B 300
 #define C 1000
 #define D 500
-void BattleMovie()
+
+void MAP_Command()
 {
-	DrawBox( A, B, C, D, Color.Blue, TRUE);
+	DrawBox( A, B, A+100, B+200, Color.Blue, TRUE);
 	DrawFormatStringToHandle( A+20, B+10, Color.White, Font.c[30],
 		"ˆÚ“®");
 	DrawFormatStringToHandle(A + 20, B + 60, Color.White, Font.c[30],

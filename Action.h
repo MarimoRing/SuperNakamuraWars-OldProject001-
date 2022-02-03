@@ -124,27 +124,29 @@ void ACTION::Calculation()
 		//If a character is selected, show the range in which it can move.
 		if (Flag.Enter == 1 && MS.Type[x][y] != 0)
 		{
+			MAP_Command();	//Display map commands 
+
 			int i, j;
 			Select = MS.Type[x][y];
 			MS.Previous[x][y] = MS.Type[x][y];
 			MS.X = x;
 			MS.Y = y;
-			for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
-			{
-				for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
+				for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
 				{
-					if (fabs(x) + fabs(y) <= MS.Move[Select] && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
+					for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
 					{
-						i = Cur.X / 100 + x;
-						j = Cur.Y / 100 + y;
-						if (i >= 0 && i < Number_of_cells && j >= 0 && j < Number_of_cells)
+						if (fabs(x) + fabs(y) <= MS.Move[Select] && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
 						{
-							Field.Type[i][j] = 1;
-							Field.Previous[i][j] = 1;
+							i = Cur.X / 100 + x;
+							j = Cur.Y / 100 + y;
+							if (i >= 0 && i < Number_of_cells && j >= 0 && j < Number_of_cells)
+							{
+								Field.Type[i][j] = 1;
+								Field.Previous[i][j] = 1;
+							}
 						}
 					}
 				}
-			}
 			Phase = 1;
 		}
 		break;
@@ -243,7 +245,6 @@ void ACTION::Change()
 		, "(Cur.X,Cur.Y) = (%d,%d)", Cur.X, Cur.Y);
 	DrawFormatStringToHandle(900, 50, Color.White, Font.c[30]
 		, "(X,Y) = (%d,%d)", (Cur.X + 100) / 100, (Cur.Y + 100) / 100);
-	BattleMovie();
 
 	//Resetting the flags
 	Flag.X_right = 0;
