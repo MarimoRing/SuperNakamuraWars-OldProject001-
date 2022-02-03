@@ -125,12 +125,13 @@ void ACTION::Calculation()
 		if (Flag.Enter == 1 && MS.Type[x][y] != 0)
 		{
 			MAP_Command();	//Display map commands 
-
-			int i, j;
-			Select = MS.Type[x][y];
-			MS.Previous[x][y] = MS.Type[x][y];
-			MS.X = x;
-			MS.Y = y;
+			if (Flag.Enter == 1)
+			{
+				int i, j;
+				Select = MS.Type[x][y];
+				MS.Previous[x][y] = MS.Type[x][y];
+				MS.X = x;
+				MS.Y = y;
 				for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
 				{
 					for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
@@ -147,7 +148,8 @@ void ACTION::Calculation()
 						}
 					}
 				}
-			Phase = 1;
+				Phase = 1;
+			}
 		}
 		break;
 	case 1:
