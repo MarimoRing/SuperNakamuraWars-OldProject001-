@@ -14,4 +14,6 @@ void MAP_Command()
 		"ê∏ê_");
 	DrawFormatStringToHandle(A + 20, B + 160, Color.White, Font.c[30],
 		"ë“ã@");
+	DrawFormatStringToHandle(A + 20 - 60, B + 10 + Arrow.X, Color.White, Font.c[30],
+		"Å®");
 }

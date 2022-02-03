@@ -1,5 +1,6 @@
 #define Number_of_cells 8
 #define Number_of_units 5
+#include "Arrow.h"
 #include "MAP_UI.h"
 class ACTION
 {
@@ -28,11 +29,11 @@ private:
 	{
 		int Type[Number_of_cells][Number_of_cells];		//Identification of MS
 		int Previous[Number_of_cells][Number_of_cells];	//Stores MS identification information
-		int X = 0;							//X coordinate of the selected MS
-		int Y = 0;							//Y coordinate of the selected MS
-		int Move[Number_of_units + 1];		//Store MS movement power
-		int X_state[Number_of_units + 1];	//Stores the X coordinate information of the MS
-		int Y_state[Number_of_units + 1];	//Stores the Y coordinate information of the MS
+		int X = 0;										//X coordinate of the selected MS
+		int Y = 0;										//Y coordinate of the selected MS
+		int Move[Number_of_units + 1];					//Store MS movement power
+		int X_state[Number_of_units + 1];				//Stores the X coordinate information of the MS
+		int Y_state[Number_of_units + 1];				//Stores the Y coordinate information of the MS
 	}MS;
 
 	struct
@@ -79,6 +80,14 @@ ACTION::ACTION()	//Initialization
 			Field.Previous[x][y] = 0;
 		}
 	}
+
+	for (int i = 0; i <= Number_of_units; i = i + 1)
+	{
+		MS.Move[i] = 0;
+		MS.X_state[i] = 0;
+		MS.Y_state[i] = 0;
+	}
+
 	MS.Type[3][7] = 1;
 	MS.Move[1] = MS1.Move;
 	MS.X_state[1] = 3 * 100;
@@ -98,11 +107,14 @@ void ACTION::Calculation()
 	else if (Key.Inf[KEY_INPUT_W] == 1) Flag.Y_down = 1;
 	else if (Key.Inf[KEY_INPUT_S] == 1) Flag.Y_up = 1;
 
-	//Cursol Move
-	if (Flag.X_right == 1) Cur.X = Cur.X + 100;
-	else if (Flag.X_left == 1) Cur.X = Cur.X - 100;
-	else if (Flag.Y_down == 1) Cur.Y = Cur.Y - 100;
-	else if (Flag.Y_up == 1) Cur.Y = Cur.Y + 100;
+	if (Phase != 1)
+	{
+		//Cursol Move
+		if (Flag.X_right == 1) Cur.X = Cur.X + 100;
+		else if (Flag.X_left == 1) Cur.X = Cur.X - 100;
+		else if (Flag.Y_down == 1) Cur.Y = Cur.Y - 100;
+		else if (Flag.Y_up == 1) Cur.Y = Cur.Y + 100;
+	}
 
 	if (Cur.X < 0) Cur.X = 0;
 	if (Cur.X > (Number_of_cells - 1) * 100) Cur.X = (Number_of_cells - 1) * 100;
@@ -152,24 +164,14 @@ void ACTION::Calculation()
 			}
 		}
 		break;
-	case 1:
-		//If you have selected a movable range, move the character.
-		if (Flag.Enter == 1 && Field.Type[x][y] != 0)
-		{
-			MS.Type[MS.X][MS.Y] = 0;
-			MS.Type[x][y] = Select;
-			MS.X_state[Select] = Cur.X;
-			MS.Y_state[Select] = Cur.Y;
-			for (int y = 0; y < Number_of_cells; y = y + 1)
-			{
-				for (int x = 0; x < Number_of_cells; x = x + 1)
-				{
-					Field.Type[x][y] = 0;
-				}
-			}
-			Phase = 2;
-		}
+	case 1: 
+		//Change selection
+		if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
+		if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
 
+		//If "Move" is selected, make the character ready to move.
+		if (Flag.Enter == 1 && Arrow.X == 0) Phase = 2;
+		
 		//If you press Delete, return the board to the previous state.
 		if (Flag.Delete == 1)
 		{
@@ -186,6 +188,30 @@ void ACTION::Calculation()
 		}
 		break;
 	case 2:
+		//If you have selected a movable range, move the character.
+		if (Flag.Enter == 1 && Field.Type[x][y] != 0)
+		{
+			MS.Type[MS.X][MS.Y] = 0;
+			MS.Type[x][y] = Select;
+			MS.X_state[Select] = Cur.X;
+			MS.Y_state[Select] = Cur.Y;
+			for (int y = 0; y < Number_of_cells; y = y + 1)
+			{
+				for (int x = 0; x < Number_of_cells; x = x + 1)
+				{
+					Field.Type[x][y] = 0;
+				}
+			}
+			Phase = 3;
+		}
+
+		//If you press Delete, return the board to the previous state.
+		if (Flag.Delete == 1)
+		{
+			Phase = 1;
+		}
+		break;
+	case 3:
 		//Select = 0;
 		//If you press Delete, return the board to the previous state.
 		if (Flag.Delete == 1)
@@ -204,7 +230,7 @@ void ACTION::Calculation()
 				}
 			}
 			MS.Type[MS.X][MS.Y] = MS.Previous[MS.X][MS.Y];
-			Phase = 1;
+			Phase = 2;
 		}
 		break;
 	}
@@ -240,7 +266,10 @@ void ACTION::Change()
 			}
 		}
 	}
-
+	if (Phase == 1)
+	{
+		MAP_Command();	//Display map commands
+	}
 	//off-screen display
 	DrawGraph(Cur.X, Cur.Y, Picture.Cursor, TRUE);
 	DrawFormatStringToHandle(900, 0, Color.White, Font.c[30]
