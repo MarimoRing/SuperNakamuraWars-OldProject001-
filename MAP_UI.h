@@ -21,7 +21,7 @@ void MAP_Command2()
 	DrawFormatStringToHandle(A + 20, B + 10, Color.White, Font.c[30],
 		"ターン終了");
 	DrawFormatStringToHandle(A + 20, B + 60, Color.White, Font.c[30],
-		"マップ全体");
+		"全体マップ");
 	DrawFormatStringToHandle(A + 20, B + 110, Color.White, Font.c[30],
 		"部隊一覧");
 	DrawFormatStringToHandle(A + 20, B + 160, Color.White, Font.c[30],

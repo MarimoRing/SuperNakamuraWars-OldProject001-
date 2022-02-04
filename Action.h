@@ -159,10 +159,18 @@ void ACTION::Calculation()
 			break;
 		case 1:
 			//Change selection
-			if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
-			if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
+			if (Flag.Y_down == 1)
+			{
+				if (Arrow.X > 0) Arrow.X = Arrow.X - 50;
+				else if (Arrow.X == 0) Arrow.X = 150;
+			}
+			if (Flag.Y_up == 1)
+			{
+				if (Arrow.X < 150) Arrow.X = Arrow.X + 50;
+				else if (Arrow.X == 150) Arrow.X = 0;
+			}
 
-			//f "TurnEnd" is selected, the turn will proceed.
+			//if "TurnEnd" is selected, the turn will proceed.
 			//if (Flag.Enter == 1 && Arrow.X == 0) Map.Phase = 2;
 
 			if (Flag.BackSpace == 1)
@@ -210,8 +218,16 @@ void ACTION::Calculation()
 			break;
 		case 1:
 			//Change selection
-			if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
-			if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
+			if (Flag.Y_down == 1)
+			{
+				if (Arrow.X > 0) Arrow.X = Arrow.X - 50;
+				else if (Arrow.X == 0) Arrow.X = 150;
+			}
+			if (Flag.Y_up == 1)
+			{
+				if (Arrow.X < 150) Arrow.X = Arrow.X + 50;
+				else if (Arrow.X == 150) Arrow.X = 0;
+			}
 
 			//If "Move" is selected, make the character ready to move.
 			if (Flag.Enter == 1 && Arrow.X == 0) MS.Phase = 2;
