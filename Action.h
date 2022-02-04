@@ -22,8 +22,8 @@ private:
 		int Move;	//Movement power
 	};
 
-	GUNDAM MS1 = { "ガンダム", Picture.Ally, 10, 10, 10, 2};
-	GUNDAM MS2 = { "ザク", Picture.Enemy, 10, 10, 10, 1};
+	GUNDAM MS1 = { "ガンダム", Picture.Ally, 10, 10, 10, 2 };
+	GUNDAM MS2 = { "ザク", Picture.Enemy, 10, 10, 10, 1 };
 
 	struct
 	{
@@ -35,12 +35,42 @@ private:
 		int X_state[Number_of_units + 1];				//Stores the X coordinate information of the MS
 		int Y_state[Number_of_units + 1];				//Stores the Y coordinate information of the MS
 		int Phase = 0;
+
+		void Initialization()
+		{
+			for (int y = 0; y < Number_of_cells; y = y + 1)
+			{
+				for (int x = 0; x < Number_of_cells; x = x + 1)
+				{
+					Type[x][y] = 0;
+					Previous[x][y] = 0;
+				}
+			}
+
+			for (int i = 0; i <= Number_of_units; i = i + 1)
+			{
+				Move[i] = 0;
+				X_state[i] = 0;
+				Y_state[i] = 0;
+			}
+		}
 	}MS;
 
 	struct
 	{
 		int Type[Number_of_cells][Number_of_cells];		//Field Identification
 		int Previous[Number_of_cells][Number_of_cells];	//Stores the field identification information
+		void Initialization()
+		{
+			for (int y = 0; y < Number_of_cells; y = y + 1)
+			{
+				for (int x = 0; x < Number_of_cells; x = x + 1)
+				{
+					Type[x][y] = 0;
+					Previous[x][y] = 0;
+				}
+			}
+		}
 	}Field;
 
 	struct
@@ -56,7 +86,7 @@ private:
 		bool Y_up = 0;
 		bool Y_down = 0;
 		bool Enter = 0;
-		bool Delete = 0;
+		bool BackSpace = 0;
 	}Flag;
 
 	struct
@@ -75,23 +105,8 @@ ACTION Action;
 
 ACTION::ACTION()	//Initialization
 {
-	for (int y = 0; y < Number_of_cells; y = y + 1)
-	{
-		for (int x = 0; x < Number_of_cells; x = x + 1)
-		{
-			MS.Type[x][y] = 0;
-			MS.Previous[x][y] = 0;
-			Field.Type[x][y] = 0;
-			Field.Previous[x][y] = 0;
-		}
-	}
-
-	for (int i = 0; i <= Number_of_units; i = i + 1)
-	{
-		MS.Move[i] = 0;
-		MS.X_state[i] = 0;
-		MS.Y_state[i] = 0;
-	}
+	MS.Initialization();
+	Field.Initialization();
 
 	MS.Type[3][7] = 1;
 	MS.Move[1] = MS1.Move;
@@ -112,7 +127,7 @@ void ACTION::Calculation()
 	else if (Key.Inf[KEY_INPUT_W] == 1) Flag.Y_down = 1;
 	else if (Key.Inf[KEY_INPUT_S] == 1) Flag.Y_up = 1;
 
-	if (MS.Phase != 1)
+	if (MS.Phase != 1 && Map.Phase != 1)
 	{
 		//Cursol Move
 		if (Flag.X_right == 1) Cur.X = Cur.X + 100;
@@ -126,125 +141,144 @@ void ACTION::Calculation()
 	if (Cur.Y < 0) Cur.Y = 0;
 	if (Cur.Y > (Number_of_cells - 1) * 100) Cur.Y = (Number_of_cells - 1) * 100;
 
-	//Cursol Enter
+	//Press Enter
 	if (Key.Inf[KEY_INPUT_NUMPADENTER] == 1) Flag.Enter = 1;
 
-	//Cursol Enter
-	if (Key.Inf[KEY_INPUT_DELETE] == 1) Flag.Delete = 1;
+	//Press BackSpace 
+	if (Key.Inf[KEY_INPUT_BACK] == 1) Flag.BackSpace = 1;
 
 	int x = Cur.X / 100;
 	int y = Cur.Y / 100;
 
-	switch (MS.Type[x][y])
+	if (MS.Type[x][y] == 0 && MS.Phase == 0)
 	{
-	case 0:
-		
-	break;
-	default:
-		//If a character is selected, show the range in which it can move.
-		if (Flag.Enter == 1 && MS.Type[x][y] != 0)
+		switch (Map.Phase)
 		{
-			switch (MS.Phase)
+		case 0:
+			if (Flag.Enter == 1) Map.Phase = 1;
+			break;
+		case 1:
+			//Change selection
+			if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
+			if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
+
+			//f "TurnEnd" is selected, the turn will proceed.
+			//if (Flag.Enter == 1 && Arrow.X == 0) Map.Phase = 2;
+
+			if (Flag.BackSpace == 1)
 			{
-			case 0:
-				//If a character is selected, show the range in which it can move.
-				if (Flag.Enter == 1 && MS.Type[x][y] != 0)
-				{
-					int i, j;
-					Select = MS.Type[x][y];
-					MS.Previous[x][y] = MS.Type[x][y];
-					MS.X = x;
-					MS.Y = y;
-					for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
-					{
-						for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
-						{
-							if (fabs(x) + fabs(y) <= MS.Move[Select] && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
-							{
-								i = Cur.X / 100 + x;
-								j = Cur.Y / 100 + y;
-								if (i >= 0 && i < Number_of_cells && j >= 0 && j < Number_of_cells)
-								{
-									Field.Type[i][j] = 1;
-									Field.Previous[i][j] = 1;
-								}
-							}
-						}
-					}
-					MS.Phase = 1;
-				}
-
-				break;
-			case 1:
-				//Change selection
-				if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
-				if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
-
-				//If "Move" is selected, make the character ready to move.
-				if (Flag.Enter == 1 && Arrow.X == 0) MS.Phase = 2;
-
-				//If you press Delete, return the board to the previous state.
-				if (Flag.Delete == 1)
-				{
-					for (int y = 0; y < Number_of_cells; y = y + 1)
-					{
-						for (int x = 0; x < Number_of_cells; x = x + 1)
-						{
-							Field.Type[x][y] = 0;
-							Field.Previous[x][y] = 0;
-						}
-					}
-					Select = 0;
-					MS.Phase = 0;
-				}
-				break;
-			case 2:
-				//If you have selected a movable range, move the character.
-				if (Flag.Enter == 1 && Field.Type[x][y] != 0)
-				{
-					MS.Type[MS.X][MS.Y] = 0;
-					MS.Type[x][y] = Select;
-					MS.X_state[Select] = Cur.X;
-					MS.Y_state[Select] = Cur.Y;
-					for (int y = 0; y < Number_of_cells; y = y + 1)
-					{
-						for (int x = 0; x < Number_of_cells; x = x + 1)
-						{
-							Field.Type[x][y] = 0;
-						}
-					}
-					MS.Phase = 3;
-				}
-
-				//If you press Delete, return the board to the previous state.
-				if (Flag.Delete == 1)
-				{
-					MS.Phase = 1;
-				}
-				break;
-			case 3:
-				//Select = 0;
-				//If you press Delete, return the board to the previous state.
-				if (Flag.Delete == 1)
-				{
-					MS.X_state[Select] = MS.X * 100;
-					MS.Y_state[Select] = MS.Y * 100;
-					for (int y = 0; y < Number_of_cells; y = y + 1)
-					{
-						for (int x = 0; x < Number_of_cells; x = x + 1)
-						{
-							if (MS.Type[x][y] == Select)
-							{
-								MS.Type[x][y] = 0;
-							}
-							Field.Type[x][y] = Field.Previous[x][y];
-						}
-					}
-					MS.Type[MS.X][MS.Y] = MS.Previous[MS.X][MS.Y];
-					MS.Phase = 2;
-				}
-				break;
+				Arrow.X = 0;
+				Map.Phase = 0;
 			}
+			break;
+		case 2:
+			break;
+		}
+	}
+	else
+	{
+		switch (MS.Phase)
+		{
+		case 0:
+			//If a character is selected, show the range in which it can move.
+			if (Flag.Enter == 1 && MS.Type[x][y] != 0)
+			{
+				int i, j;
+				Select = MS.Type[x][y];
+				MS.Previous[x][y] = MS.Type[x][y];
+				MS.X = x;
+				MS.Y = y;
+				for (int y = -(MS.Move[Select]); y <= MS.Move[Select]; y = y + 1)
+				{
+					for (int x = -(MS.Move[Select]); x <= MS.Move[Select]; x = x + 1)
+					{
+						if (fabs(x) + fabs(y) <= MS.Move[Select] && (Cur.X / 100) + x >= 0 && (Cur.Y / 100) + y >= 0)
+						{
+							i = Cur.X / 100 + x;
+							j = Cur.Y / 100 + y;
+							if (i >= 0 && i < Number_of_cells && j >= 0 && j < Number_of_cells)
+							{
+								Field.Type[i][j] = 1;
+								Field.Previous[i][j] = 1;
+							}
+						}
+					}
+				}
+				MS.Phase = 1;
+			}
+
+			break;
+		case 1:
+			//Change selection
+			if (Flag.Y_down == 1 && Arrow.X > 0) Arrow.X = Arrow.X - 50;
+			if (Flag.Y_up == 1 && Arrow.X < 150) Arrow.X = Arrow.X + 50;
+
+			//If "Move" is selected, make the character ready to move.
+			if (Flag.Enter == 1 && Arrow.X == 0) MS.Phase = 2;
+
+			//If you press BackSpace, return the board to the previous state.
+			if (Flag.BackSpace == 1)
+			{
+				for (int y = 0; y < Number_of_cells; y = y + 1)
+				{
+					for (int x = 0; x < Number_of_cells; x = x + 1)
+					{
+						Field.Type[x][y] = 0;
+						Field.Previous[x][y] = 0;
+					}
+				}
+				Select = 0;
+				Arrow.X = 0;
+				MS.Phase = 0;
+			}
+			break;
+		case 2:
+			//If you have selected a movable range, move the character.
+			if (Flag.Enter == 1 && Field.Type[x][y] != 0)
+			{
+				MS.Type[MS.X][MS.Y] = 0;
+				MS.Type[x][y] = Select;
+				MS.X_state[Select] = Cur.X;
+				MS.Y_state[Select] = Cur.Y;
+				for (int y = 0; y < Number_of_cells; y = y + 1)
+				{
+					for (int x = 0; x < Number_of_cells; x = x + 1)
+					{
+						Field.Type[x][y] = 0;
+					}
+				}
+				MS.Phase = 3;
+			}
+
+			//If you press BackSpace, return the board to the previous state.
+			if (Flag.BackSpace == 1)
+			{
+				MS.Phase = 1;
+			}
+			break;
+		case 3:
+			//Select = 0;
+			//If you press BackSpace, return the board to the previous state.
+			if (Flag.BackSpace == 1)
+			{
+				MS.X_state[Select] = MS.X * 100;
+				MS.Y_state[Select] = MS.Y * 100;
+				for (int y = 0; y < Number_of_cells; y = y + 1)
+				{
+					for (int x = 0; x < Number_of_cells; x = x + 1)
+					{
+						if (MS.Type[x][y] == Select)
+						{
+							MS.Type[x][y] = 0;
+						}
+						Field.Type[x][y] = Field.Previous[x][y];
+					}
+				}
+				MS.Type[MS.X][MS.Y] = MS.Previous[MS.X][MS.Y];
+				MS.Phase = 2;
+			}
+			break;
+			
 		}
 	}
 }
@@ -283,7 +317,7 @@ void ACTION::Change()
 	{
 		MS_Command();	//Display MS commands
 	}
-	if (Flag.Enter == 1 && MS.Type[Cur.X / 100][Cur.Y / 100] == 0)
+	if (Map.Phase == 1 && MS.Type[Cur.X / 100][Cur.Y / 100] == 0)
 	{
 		MAP_Command2();	//Display map commands
 	}
@@ -300,5 +334,5 @@ void ACTION::Change()
 	Flag.Y_down = 0;
 	Flag.Y_up = 0;
 	Flag.Enter = 0;
-	Flag.Delete = 0;
+	Flag.BackSpace = 0;
 }
