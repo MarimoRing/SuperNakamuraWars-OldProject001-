@@ -15,7 +15,7 @@ void MS_Command()
 	DrawFormatStringToHandle(A + 20 - 60, B + 10 + Arrow.X, Color.White, Font.c[30],
 		"Å®");
 }
-void MAP_Command2()
+void MAP_Command()
 {
 	DrawBox(A, B, A + 200, B + 200, Color.Blue, TRUE);
 	DrawFormatStringToHandle(A + 20, B + 10, Color.White, Font.c[30],
@@ -26,6 +26,21 @@ void MAP_Command2()
 		"ïîë‡àÍóó");
 	DrawFormatStringToHandle(A + 20, B + 160, Color.White, Font.c[30],
 		"ÉZÅ[Éu");
+	DrawFormatStringToHandle(A + 20 - 60, B + 10 + Arrow.X, Color.White, Font.c[30],
+		"Å®");
+}
+
+void ATTACK_Command()
+{
+	DrawBox(A, B, A + 160, B + 200, Color.Blue, TRUE);
+	DrawFormatStringToHandle(A + 20, B + 10, Color.White, Font.c[30],
+		"í èÌçUåÇ");
+	DrawFormatStringToHandle(A + 20, B + 60, Color.White, Font.c[30],
+		"âìäuçUåÇ");
+	DrawFormatStringToHandle(A + 20, B + 110, Color.White, Font.c[30],
+		"ñÇñ@çUåÇ");
+	DrawFormatStringToHandle(A + 20, B + 160, Color.White, Font.c[30],
+		"âúã`");
 	DrawFormatStringToHandle(A + 20 - 60, B + 10 + Arrow.X, Color.White, Font.c[30],
 		"Å®");
 }

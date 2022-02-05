@@ -87,12 +87,20 @@ private:
 		bool Y_down = 0;
 		bool Enter = 0;
 		bool BackSpace = 0;
+		bool BackMenu = 0;
+		int Command = 0;
+		int Attack = 0;
 	}Flag;
 
 	struct
 	{
 		int Phase = 0;
 	}Map;
+
+	struct
+	{
+		int Phase = 0;
+	}Attack;
 
 	int Turn = 1;
 	int Select = 0;
@@ -234,29 +242,31 @@ void ACTION::Calculation()
 					else if (Arrow.X == 150) Arrow.X = 0;
 				}
 
-				if (Flag.Enter == 1)
+				if (Flag.Enter == 1) Flag.Command = Arrow.X / 50 + 1;
+
+				switch (Flag.Command)
 				{
-					switch (Arrow.X)
-					{
-					//If "移動" is selected, make the character ready to move.
-					case 0:
-						MS.Phase = 2;
-						break;
-					//If "攻撃" is selected, attack the enemy.
-					case 50:
-						attack();
-						break;
-					case 100:
+				//If "移動" is selected, make the character ready to move.
+				case 1:
+					MS.Phase = 2;
+					break;
+				//If "攻撃" is selected, attack the enemy.
+				case 2:
+					attack();
+					break;
+				//If "精神" is selected, open the "精神コマンド"
+				case 3:
 
-						break;
-					case 150:
+					break;
+				//If the "能力" option is selected, check the character's status, etc.
+				case 4:
 
-						break;
-					}
+					break;
 				}
+				
 
 				//If you press BackSpace, return the board to the previous state.
-				if (Flag.BackSpace == 1)
+				if (Flag.BackSpace == 1 &&  Flag.BackMenu == 0)
 				{
 					for (int y = 0; y < Number_of_cells; y = y + 1)
 					{
@@ -293,6 +303,9 @@ void ACTION::Calculation()
 				if (Flag.BackSpace == 1)
 				{
 					MS.Phase = 1;
+					Flag.Command = 0;
+					Cur.X = MS.X * 100;
+					Cur.Y = MS.Y * 100;
 				}
 				break;
 			case 3:
@@ -302,6 +315,7 @@ void ACTION::Calculation()
 				{
 					MS.X_state[Select] = MS.X * 100;
 					MS.Y_state[Select] = MS.Y * 100;
+					
 					for (int y = 0; y < Number_of_cells; y = y + 1)
 					{
 						for (int x = 0; x < Number_of_cells; x = x + 1)
@@ -356,9 +370,11 @@ void ACTION::Change()
 	}
 
 	//Display MS commands
-	if (MS.Phase == 1) MS_Command();
+	if (MS.Phase == 1 && Attack.Phase == 0 && Flag.Command == 0) MS_Command();
+	//Display Attack commands
+	if (Attack.Phase == 1) ATTACK_Command();
 	//Display map commands
-	if (Map.Phase == 1 && MS.Type[Cur.X / 100][Cur.Y / 100] == 0) MAP_Command2();
+	if (Map.Phase == 1 && MS.Type[Cur.X / 100][Cur.Y / 100] == 0) MAP_Command();
 
 	//off-screen display
 	DrawGraph(Cur.X, Cur.Y, Picture.Cursor, TRUE);
@@ -374,9 +390,34 @@ void ACTION::Change()
 	Flag.Y_up = 0;
 	Flag.Enter = 0;
 	Flag.BackSpace = 0;
+	Flag.BackMenu = 0;
 }
 
 void ACTION::attack()
 {
+	//Initialize the arrow position.
+	if (Attack.Phase == 0) Arrow.X = 0;
+	
+	//Display "ATTACK_Command"
+	Attack.Phase = 1;
+	
+	//Change selection
+	if (Flag.Y_down == 1)
+	{
+		if (Arrow.X > 0) Arrow.X = Arrow.X - 50;
+		else if (Arrow.X == 0) Arrow.X = 150;
+	}
+	if (Flag.Y_up == 1)
+	{
+		if (Arrow.X < 150) Arrow.X = Arrow.X + 50;
+		else if (Arrow.X == 150) Arrow.X = 0;
+	}
 
+	//If you press BackSpace, return the board to the previous state.
+	if (Flag.BackSpace == 1)
+	{
+		Attack.Phase = 0;
+		Flag.Command = 0;
+		Flag.BackMenu = 1;
+	}
 }
