@@ -202,8 +202,27 @@ void ACTION::Calculation()
 			{
 			case 0:
 				//If a character is selected, show the range in which it can move.
-				if (Flag.Enter == 1 && MS.Type[x][y] != 0)
+				if (Flag.Enter == 1 && MS.Type[x][y] != 0) MS.Phase = 1;
+				break;
+			case 1:
+				//Change selection
+				if (Flag.Y_down == 1)
 				{
+					if (Arrow.X > 0) Arrow.X = Arrow.X - 50;
+					else if (Arrow.X == 0) Arrow.X = 150;
+				}
+				if (Flag.Y_up == 1)
+				{
+					if (Arrow.X < 150) Arrow.X = Arrow.X + 50;
+					else if (Arrow.X == 150) Arrow.X = 0;
+				}
+
+				if (Flag.Enter == 1) Flag.Command = Arrow.X / 50 + 1;
+
+				switch (Flag.Command)
+				{
+				//If "ˆÚ“®" is selected, make the character ready to move.
+				case 1:
 					int i, j;
 					Select = MS.Type[x][y];
 					MS.Previous[x][y] = MS.Type[x][y];
@@ -225,29 +244,6 @@ void ACTION::Calculation()
 							}
 						}
 					}
-					MS.Phase = 1;
-				}
-
-				break;
-			case 1:
-				//Change selection
-				if (Flag.Y_down == 1)
-				{
-					if (Arrow.X > 0) Arrow.X = Arrow.X - 50;
-					else if (Arrow.X == 0) Arrow.X = 150;
-				}
-				if (Flag.Y_up == 1)
-				{
-					if (Arrow.X < 150) Arrow.X = Arrow.X + 50;
-					else if (Arrow.X == 150) Arrow.X = 0;
-				}
-
-				if (Flag.Enter == 1) Flag.Command = Arrow.X / 50 + 1;
-
-				switch (Flag.Command)
-				{
-				//If "ˆÚ“®" is selected, make the character ready to move.
-				case 1:
 					MS.Phase = 2;
 					break;
 				//If "UŒ‚" is selected, attack the enemy.
@@ -268,16 +264,7 @@ void ACTION::Calculation()
 				//If you press BackSpace, return the board to the previous state.
 				if (Flag.BackSpace == 1 &&  Flag.BackMenu == 0)
 				{
-					for (int y = 0; y < Number_of_cells; y = y + 1)
-					{
-						for (int x = 0; x < Number_of_cells; x = x + 1)
-						{
-							Field.Type[x][y] = 0;
-							Field.Previous[x][y] = 0;
-						}
-					}
-					Select = 0;
-					Arrow.X = 0;
+					
 					MS.Phase = 0;
 				}
 				break;
@@ -302,6 +289,16 @@ void ACTION::Calculation()
 				//If you press BackSpace, return the board to the previous state.
 				if (Flag.BackSpace == 1)
 				{
+					for (int y = 0; y < Number_of_cells; y = y + 1)
+					{
+						for (int x = 0; x < Number_of_cells; x = x + 1)
+						{
+							Field.Type[x][y] = 0;
+							Field.Previous[x][y] = 0;
+						}
+					}
+					Select = 0;
+					Arrow.X = 0;
 					MS.Phase = 1;
 					Flag.Command = 0;
 					Cur.X = MS.X * 100;
